@@ -445,7 +445,7 @@ class Multiprocesser():
             res = pool.map( func, image_pairs)
         else:
             for image_pair in image_pairs:
-                func( image_pair )
+                res = func( image_pair )
         return res
                 
 
