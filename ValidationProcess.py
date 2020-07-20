@@ -28,5 +28,5 @@ def process (args):
 run_path = ''
 raw_data_path = os.path.join(run_path, 'Images')
 Analysis_path = tools.create_directory(run_path)
-task = tools.Multiprocesser( data_dir=raw_data_path, pattern_a='*LA.TIF', pattern_b='*LB.TIF' )
+task = tools.Multiprocesser( data_dir=raw_data_path, pattern_a='*.bmp' )
 task.run( func = process, n_cpus=1)
