@@ -442,12 +442,10 @@ class Multiprocesser():
         # since it is difficult to debug multiprocessing stuff.
         if n_cpus > 1:
             pool = multiprocessing.Pool( processes = n_cpus )
-            res = pool.map( func, image_pairs)
+            pool.map( func, image_pairs)
         else:
             for image_pair in image_pairs:
-                res = func( image_pair )
-        return res
-                
+                func( image_pair )
 
 def negative( image):
     """ Return the negative of an image
