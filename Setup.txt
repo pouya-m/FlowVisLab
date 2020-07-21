@@ -1,14 +1,4 @@
 how to compile:
-use original readme.md + setup.py file (commenting out the process.pyx line in the extensions)
-they should be placed one folder above the openpiv library folder
-then run the following:
+use read.md + setup.py files and run the following:
 %%bash
 python /content/setup.py build_ext --inplace
-
-clone:
-!pip install githubdl
-import githubdl
-
-git_token='03d7e2f91f002c55491ae8e8b1b00a83e23a0f9b'
-githubdl.dl_dir('https://github.com/pouya-m/FlowVisLab', 'openpiv', github_token=git_token)
-githubdl.dl_dir('https://github.com/pouya-m/FlowVisLab', 'Images', github_token=git_token)
