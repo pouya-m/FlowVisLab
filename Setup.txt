@@ -1,0 +1,9 @@
+compile:
+%%bash
+export PATH=$PATH:/usr/local/lib/python3.6/dist-packages/numpy/core/include/
+gcc /content/openpiv-python/openpiv/lib.c -c /content/openpiv-python/openpiv/lib $(pkg-config --cflags --libs python3) -I/usr/local/lib/python3.6/dist-packages/numpy/core/include/
+
+clone:
+%%bash
+git clone https://github.com/pouya-m/openpiv-python
+
