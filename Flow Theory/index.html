@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><title>Interactive Flow Studies - FLOWEX</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css" media="screen">@import "/webstyle.css";</style>
+<script type="text/javascript" src="/flowex.js"></script>
+</head>
+<body>
+<table align="center" cellspacing="12" width="100%">
+<tr><td></td><td class="header" id="banner" align="center" colspan=1>FLOWEX<i><br><small>Interactive Flow Visualization and Analysis Tool</small></br></i></td></tr>
+<tr><td class="navigation"><ul class="nav">
+<li><a href="/">Quick Start</a></li>
+<li><a href='/setup/'>Setup</a></li>
+<li><a href="/acquire/">Acquire</a></li>
+<li><a href="/analyze/">Analyze (PIV)</a></li>
+<li id="thermo_menu" style='display:none'><a href="/thermo/">Analyze (Thermo)</a></li>
+<li><a href="/simulate/">Simulate (CFD)</a></li>
+<li><a href="/session/">Session</a></li>
+<li><a href="/output/" target="_blank">Output</a></li>
+<li><a href='/theory'>Flow Theory</a></li>
+<li><a href='/links'>Links</a></li>
+<li><a href="http://interactiveflows.com/">Visit Web Site</a></li>
+</ul>
+
+
+<input type="hidden" name="has_thermo" id="has_thermo" value="0">
+<script>
+update_params("/output/global.cfg");
+showif('has_thermo', 'thermo_menu');
+</script>
+</td><td class="content" colspan=2>
+
+
+<h2>Flow Theory</h2>
+
+
+Click on the links below to download the documents.
+
+<ul>
+<li><a href="ductflow.pdf">Duct Flow</a></li>
+<li><a href="streamlines.pdf">Streamlines</a></li>
+<li><a href="flowseparation.pdf">Flow Separation</a></li>
+<li><a href="evaluation.pdf">Student Evaluation</a></li>
+<li><a href="navier.pdf">Computational Fluid Dynamics</a></li>
+<li><a href="camera.pdf">PIV Camera Control</a></li>
+<ul>
+</td></tr></table>
+<center>Copyright &copy; 2005-2012 Interactive Flow Studies<center>
+</body>
+</html>
