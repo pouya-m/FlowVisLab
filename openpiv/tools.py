@@ -210,14 +210,15 @@ def convert16bitsTIF( filename, save_name):
     imsave(save_name, img2)
 
 
-def mark_background(threshold, list_img, filename):
+def mark_reflection(threshold, list_img, filename):
     list_frame = []
     for I in range(len(list_img)):
         list_frame.append(imread(list_img[I]))
     mark = np.zeros(list_frame[0].shape, dtype=np.int32)
     background = np.zeros(list_frame[0].shape, dtype=np.int32)
+    print('finding reflections...')
     for I in range(mark.shape[0]):
-        print((" row ", I , " / " , mark.shape[0]))
+        #print((" row ", I , " / " , mark.shape[0]))
         for J in range(mark.shape[1]):
             sum1 = 0
             for K in range(len(list_frame)):
@@ -227,8 +228,8 @@ def mark_background(threshold, list_img, filename):
             else:
                 mark[I, J] = 1
             background[I, J] = mark[I, J]*255
-    imsave(filename, background)
-    print("done with background")
+    #imsave(filename, background)
+    print("- done with reflections")
     return background
 
 
@@ -460,10 +461,10 @@ class Multiprocesser():
         pool = multiprocessing.Pool( processes = n_cpus )
         res = pool.map( find_bg, file_a)
         background_a = find_bg(list_img=res)
-        print('- done finding background for image set A')
+        print('- done with background for image set A')
         res = pool.map( find_bg, file_b)
         background_b = find_bg(list_img=res)
-        print('- done finding background for image set B')
+        print('- done with background for image set B')
         #print(f'number of sets: {len(res)}')
         #print(f'n of images in the last set: {len(file_b[-1])}')
 
@@ -607,7 +608,7 @@ def create_path(file_name, folder='Analysis'):
 
     name = os.path.basename(file_name)
     name, *_ = name.split('.')
-    directory = os.path.dirname(os.path.dirname(file_name))
+    directory = os.path.dirname(file_name)
     file_path = os.path.join(directory, f'{folder}/{name}')
     return file_path
 
