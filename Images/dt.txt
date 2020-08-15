@@ -1,0 +1,6 @@
+these are the time steps (dt) for different experiments in seconds:
+square insert:			0.003094
+venturi:				0.002094
+orifice comparison:		0.001094
+
+- frame rate of the camera is fixed at 67.308 fps

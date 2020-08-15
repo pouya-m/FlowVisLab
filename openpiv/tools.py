@@ -210,7 +210,7 @@ def convert16bitsTIF( filename, save_name):
     imsave(save_name, img2)
 
 
-def mark_reflection(threshold, list_img, filename):
+def mark_reflection(threshold, list_img):
     list_frame = []
     for I in range(len(list_img)):
         list_frame.append(imread(list_img[I]))
@@ -228,7 +228,6 @@ def mark_reflection(threshold, list_img, filename):
             else:
                 mark[I, J] = 1
             background[I, J] = mark[I, J]*255
-    #imsave(filename, background)
     print("- done with reflections")
     return background
 

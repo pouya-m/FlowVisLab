@@ -1,2 +1,4 @@
 openpiv/__pycache__/
 Remote Lab/
+*.dat
+

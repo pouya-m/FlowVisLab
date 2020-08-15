@@ -1,13 +1,13 @@
 from openpiv import tools, pyprocess, validation, filters
 from openpiv.smoothn import smoothn
-import os
+import os,glob
 from functools import partial
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
-#from imageio import imread, imsave
-#from skimage import filters as filt
+from imageio import imread, imsave
 from skimage import draw
+import numpy as np
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -43,9 +43,9 @@ def process (args, bga, bgb, reflection):
     
     # main piv processing
     u, v, sig2noise = pyprocess.extended_search_area_piv( frame_a, frame_b, \
-        window_size=48, overlap=16, dt=1, search_area_size=64, sig2noise_method='peak2peak')
+        window_size=48, overlap=16, dt=0.001094, search_area_size=64, sig2noise_method='peak2peak')
     x, y = pyprocess.get_coordinates( image_size=frame_a.shape, window_size=48, overlap=16 )
-    u, v, mask = validation.local_median_val(u, v, 5, 5, size=2)
+    u, v, mask = validation.local_median_val(u, v, 2000, 2000, size=2)
     u, v = filters.replace_outliers( u, v, method='localmean', max_iter=10, kernel_size=2)
     u, *_ = smoothn(u, s=1.0)
     v, *_ = smoothn(v, s=1.0)
@@ -66,7 +66,7 @@ def plotResult(file):
 
 
 if __name__ == '__main__':
-    
+    '''
     # setting up the path and grabbing the files
     run_path = 'E:\\repos\\FlowVisLab\\Images'
     data_path = os.path.join(run_path, 'raw_001094')
@@ -81,10 +81,30 @@ if __name__ == '__main__':
     # start processing data
     print('main process:\nprocessing images...')
     main_process = partial(process, bga=bg_a, bgb=bg_b, reflection=reflection)
+    task.n_files = 10
     task.run( func=main_process, n_cpus=4)
     print('- done processing')
     
     # plotting the result
     plotResult('E:\\repos\\FlowVisLab\\Images\\raw_001094\\Analysis\\frame0000.dat')
-
+    '''
+    def find_nearest(array, value):
+        array = np.asarray(array)
+        idx = (np.abs(array - value)).argmin()
+        return idx
+    
+    files = sorted(glob.glob('E:\\repos\\FlowVisLab\\Images\\raw_001094\\Analysis\\frame*.dat'))
+    x, y, *_ = tools.read_data(files[0])
+    idx = find_nearest(x[0,:], 400)
+    idy = find_nearest(y[:,0], 200)
+    u1 = []
+    v1 = []
+    for i in range(len(files)):
+        x, y, u, v, mask = tools.read_data(files[i])
+        u1.append(u[idx,idy])
+        v1.append(v[idx,idy])
+    fig, ax = plt.subplots()
+    ax.plot(u1)
+    ax.plot(v1)
+    plt.show()
     
