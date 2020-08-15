@@ -1,9 +1,11 @@
-import tools, pyprocess, validation, filters, scaling
-from smoothn import smoothn
+from openpiv import tools, pyprocess, validation, filters, scaling
+from openpiv.smoothn import smoothn
 from functools import partial
 import numpy as np
 import matplotlib.pyplot as plt
-import os
+import os, warnings
+
+warnings.filterwarnings("ignore")
 
 
 # this function runs the main PIV analysis
@@ -27,8 +29,8 @@ def ProcessPIV (args, bga, bgb, reflection, stg):
     x, y = pyprocess.get_coordinates( image_size=frame_a.shape, window_size=stg['WS'], overlap=stg['OL'] )
     
     if stg['BVR'] == 'on':
-        u, v, mask = validation.local_median_val(u, v, stg['UV'], stg['VV'], size=2)
-        #u, v, mask = validation.global_val(u, v, u_thresholds=(-200,200), v_thresholds=(-200,1000))
+        u, v, mask = validation.local_median_val(u, v, stg['MF'][0], stg['MF'][1], size=2)
+        u, v, mask = validation.global_val(u, v, u_thresholds=stg['GF'][0], v_thresholds=stg['GF'][1])
         u, v = filters.replace_outliers( u, v, method='localmean', max_iter=10, kernel_size=2)
         u, *_ = smoothn(u, s=0.5)
         v, *_ = smoothn(v, s=0.5)
@@ -39,18 +41,17 @@ def ProcessPIV (args, bga, bgb, reflection, stg):
     
 
 # this function draws the vector field
-def DrawPIVPlot(files, scale):
+def DrawPIVPlot(files, scale, bg):
     # reading saved data and creating vector labels
     x, y, u, v, label = tools.read_data(files)
     label = []
     for i in range(x.shape[0]):
         for j in range(x.shape[1]):
-            label.append(f'Ux:{u[i, j]:6.4f} , Uy:{v[i, j]:6.4f} (mm/s)')
+            label.append(f'Ux:{u[i, j]:4.2f} , Uy:{v[i, j]:4.2f} (mm/s)')
     # plotting the results
     fig, ax = plt.subplots()
-    bg = tools.imread(os.path.join(os.path.dirname(files), 'background.jpg'))
     ax.imshow(bg, cmap='gray', extent=[0., 780/scale, 0., 580/scale])
-    q = ax.quiver(x, y, u, v, color='b', units='xy', minlength=0.1, minshaft=1.2)
+    q = ax.quiver(x, y, u, -v, color='b', units='xy', minlength=0.1, minshaft=1.2)
     ax.set_title('Velocity Field', size=16)
     ax.set_xlabel('x (mm)', size=14, labelpad=2)
     ax.set_ylabel('y (mm)', size=14, labelpad=-10)
@@ -67,13 +68,13 @@ def ProcessHandler(stg):
         print('preprocessing:')
         bg_a, bg_b = task.find_background(50, 10 , 6)
         reflection = tools.mark_reflection(180, task.files_a)
-        tools.imsave(os.path.join(stg['DP'], 'Analysis/reflection.jpg'), reflection)
+        #tools.imsave(os.path.join(stg['DP'], 'Analysis/reflection.jpg'), reflection)
     else:
         bg_a, bg_b, reflection = tools.imread(os.path.join(stg['DP'], 'avg.jpg')), None, None
-    tools.imsave(os.path.join(stg['DP'], 'Analysis/background.jpg'), bg_a)
+    #tools.imsave(os.path.join(stg['DP'], 'Analysis/background.jpg'), bg_a)
     # start processing data
     print('main process:\nprocessing images...')
-    task.n_files = 6
+    #task.n_files = 6
     main_process = partial(ProcessPIV, bga=bg_a, bgb=bg_b, reflection=reflection, stg=stg)
     task.run( func=main_process, n_cpus=6)
     print('- done processing')
@@ -89,6 +90,7 @@ def ProcessHandler(stg):
     ax[1,1].imshow(img, cmap='gray')
     plt.show()
     '''
+    return bg_a
 
 # test function
 def TestRun():
@@ -105,11 +107,11 @@ def TestRun():
     stg['UV'] = 2000
     stg['VV'] = 2000
 
-    ProcessHandler(stg)
+    bg = ProcessHandler(stg)
 
     # plot results
     files = os.path.join(stg['DP'], f'Analysis/frame0000.dat')
-    fig, q, label = DrawPIVPlot(files, stg['SC'])
+    fig, q, label = DrawPIVPlot(files, stg['SC'], bg)
     return fig
 
 

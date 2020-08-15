@@ -568,13 +568,13 @@ def read_data(filename):
     x, y, u, v, mask : numpy arrays containing the position and field data
     """
     a = np.loadtxt(filename, skiprows=1)
-    nx = int((a[-1,0]-a[0,0])/(a[1,0]-a[0,0]) + 1)
-    ny = a.shape[0]//nx 
+    nx = int(round((a[-1,0]-a[0,0])/(a[1,0]-a[0,0]) + 1))
+    ny = a.shape[0]//nx
     m = np.zeros((ny, nx, 5))
     for j in range(5):
         for i in range(ny):
             m[i,:,j] = a[i*nx:(i+1)*nx,j].T
-    
+    print(f'{ny},{nx}')
     return m[:,:,0], m[:,:,1], m[:,:,2], m[:,:,3], m[:,:,4]
 
 
