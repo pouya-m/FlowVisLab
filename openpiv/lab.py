@@ -192,7 +192,7 @@ def SavePIVanim(address, scale, bg):
         img = Image.frombytes('RGB', fig.canvas.get_width_height(),fig.canvas.tostring_rgb())
         imglist.append(img)
 
-    imglist[0].save(os.path.join(os.path.dirname(files[0]), 'result.gif'),
+    imglist[0].save(os.path.join(os.path.dirname(files[0]), '1result.gif'),
                save_all=True, append_images=imglist[1:], optimize=False, duration=200, loop=0)
 
 if __name__ == '__main__':
