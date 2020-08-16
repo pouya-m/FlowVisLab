@@ -169,7 +169,8 @@ def GeneratePIVanim(files, scale, bg):
     plt.show()
 
 
-def SavePIVanim(files, scale, bg):
+def SavePIVanim(address, scale, bg):
+    files = sorted(glob.glob(os.path.join(address, 'Analysis/frame*.dat')))
     x, y, u, v, _ = tools.read_data(files[0])
     fig = Figure(figsize=(5, 4), dpi=100)
     canvas = FigureCanvasAgg(fig)
@@ -197,5 +198,5 @@ def SavePIVanim(files, scale, bg):
 if __name__ == '__main__':
 
     bg = tools.imread('E:\\repos\\FlowVisLab\\Images\\Orifice_flat\\avg.jpg')
-    files = sorted(glob.glob('E:\\repos\\FlowVisLab\\Images\\Orifice_flat\\Analysis\\frame*.dat'))
-    SavePIVanim(files, 25, bg)
+    #files = sorted(glob.glob('E:\\repos\\FlowVisLab\\Images\\Orifice_flat\\Analysis\\frame*.dat'))
+    SavePIVanim('E:\\repos\\FlowVisLab\\Images\\Orifice_flat', 25, bg)
