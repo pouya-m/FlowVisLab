@@ -574,7 +574,6 @@ def read_data(filename):
     for j in range(5):
         for i in range(ny):
             m[i,:,j] = a[i*nx:(i+1)*nx,j].T
-    print(f'{ny},{nx}')
     return m[:,:,0], m[:,:,1], m[:,:,2], m[:,:,3], m[:,:,4]
 
 

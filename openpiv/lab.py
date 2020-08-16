@@ -3,7 +3,11 @@ from openpiv.smoothn import smoothn
 from functools import partial
 import numpy as np
 import matplotlib.pyplot as plt
-import os, warnings
+from matplotlib import animation
+import os, glob, warnings
+from PIL import Image
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+from matplotlib.figure import Figure
 
 warnings.filterwarnings("ignore")
 
@@ -92,6 +96,36 @@ def ProcessHandler(stg):
     '''
     return bg_a
 
+
+# this function writes the gerris simulation file
+def WriteGerrisFile(file, stg):
+    with open(file, 'w') as fh:
+        fh.write('2 1 GfsSimulation GfsBox GfsGEdge {} {')
+        fh.write('\n  GfsTime {{ end = {} }}'.format(stg['ST']))
+        fh.write('\n  GfsRefine {}'.format(stg['MR']))
+        fh.write('\n  GfsRefineSolid {}'.format(stg['MR']))
+        fh.write('\n  GfsSolid model.gts')
+        fh.write('\n  GfsInit {{}} {{ U = {} }}'.format(stg['IV']))
+        fh.write('\n  EventStop { istep = 1 } U 0.001 DU')
+        fh.write('\n  GfsOutputTime {{ step = {} }} stdout'.format(stg['ODT']))
+        fh.write('\n  GfsOutputSimulation {{ start = {} step = {} }} output_%.3f.txt {{'.format(stg['OST'], stg['ODT']))
+        fh.write('\n    variables = U,V,P')
+        fh.write('\n    format = text')
+        fh.write('\n    solid = 1')
+        fh.write('\n  }')
+        fh.write('\n  PhysicalParams { L = 80 }')
+        fh.write('\n  SourceViscosity 1.004\n}')
+        fh.write('\nGfsBox {')
+        fh.write('\n  left   = GfsBoundary {{ GfsBcDirichlet U {{ return (1)*{}; }} GfsBcDirichlet V 0 }}'.format(stg['IV']))
+        fh.write('\n  top    = Boundary { BcDirichlet U 0 BcDirichlet V 0 }')
+        fh.write('\n  bottom = Boundary { BcDirichlet U 0 BcDirichlet V 0 }\n}')
+        fh.write('\nGfsBox {')
+        fh.write('\n  right  = GfsBoundaryOutflow')
+        fh.write('\n  top    = Boundary { BcDirichlet U 0 BcDirichlet V 0 }')
+        fh.write('\n  bottom = Boundary { BcDirichlet U 0 BcDirichlet V 0 }\n}')
+        fh.write('\n1 2 right')
+
+
 # test function
 def TestRun():
     # setting up the process settings
@@ -115,6 +149,53 @@ def TestRun():
     return fig
 
 
-if __name__ == '__main__':
-    fig = TestRun()
+def update_quiver(num, q, x, y):
+    x, y, u, v, _ = tools.read_data(files[num])
+    q.set_UVC(u,v)
+    return q
+
+
+def GeneratePIVanim(files, scale, bg):
+    x, y, u, v, _ = tools.read_data(files[0])
+    fig, ax = plt.subplots()
+    ax.imshow(bg, cmap='gray', extent=[0., 780/scale, 0., 580/scale])
+    q = ax.quiver(x, y, u, v, color='b', units='xy', minlength=0.1, minshaft=1.2)
+    ax.set_title('Velocity Field', size=16)
+    ax.set_xlabel('x (mm)', size=14, labelpad=2)
+    ax.set_ylabel('y (mm)', size=14, labelpad=-10)
+
+    anim = animation.FuncAnimation(fig, update_quiver,frames=45, fargs=(q, x, y),
+                               interval=1000, blit=False)
     plt.show()
+
+
+def SavePIVanim(files, scale, bg):
+    x, y, u, v, _ = tools.read_data(files[0])
+    fig = Figure(figsize=(5, 4), dpi=100)
+    canvas = FigureCanvasAgg(fig)
+    ax = fig.add_subplot(111)
+    ax.imshow(bg, cmap='gray', extent=[0., 780/scale, 0., 580/scale])
+    q = ax.quiver(x, y, u, v, color='b', units='xy', minlength=0.1, minshaft=1.2)
+    ax.set_title('Velocity Field', size=16)
+    ax.set_xlabel('x (mm)', size=14, labelpad=2)
+    ax.set_ylabel('y (mm)', size=14, labelpad=2)
+    plt.tight_layout(pad=10)
+    canvas.draw()
+    imglist = []
+    img = Image.frombytes('RGB', fig.canvas.get_width_height(),fig.canvas.tostring_rgb())
+    imglist.append(img)
+    for i in range(len(files)):
+        x, y, u, v, _ = tools.read_data(files[i])
+        q.set_UVC(u,v)
+        canvas.draw()
+        img = Image.frombytes('RGB', fig.canvas.get_width_height(),fig.canvas.tostring_rgb())
+        imglist.append(img)
+
+    imglist[0].save(os.path.join(os.path.dirname(files[0]), 'result.gif'),
+               save_all=True, append_images=imglist[1:], optimize=False, duration=200, loop=0)
+
+if __name__ == '__main__':
+
+    bg = tools.imread('E:\\repos\\FlowVisLab\\Images\\Orifice_flat\\avg.jpg')
+    files = sorted(glob.glob('E:\\repos\\FlowVisLab\\Images\\Orifice_flat\\Analysis\\frame*.dat'))
+    SavePIVanim(files, 25, bg)
