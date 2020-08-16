@@ -180,7 +180,7 @@ def SavePIVanim(address, scale, bg):
     ax.set_title('Velocity Field', size=16)
     ax.set_xlabel('x (mm)', size=14, labelpad=2)
     ax.set_ylabel('y (mm)', size=14, labelpad=2)
-    plt.tight_layout(pad=10)
+    #plt.tight_layout(pad=10)
     canvas.draw()
     imglist = []
     img = Image.frombytes('RGB', fig.canvas.get_width_height(),fig.canvas.tostring_rgb())
