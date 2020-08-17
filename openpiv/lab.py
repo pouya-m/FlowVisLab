@@ -8,6 +8,8 @@ import os, glob, warnings
 from PIL import Image
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
+from matplotlib.collections import PatchCollection
+from matplotlib.patches import Wedge
 
 warnings.filterwarnings("ignore")
 
@@ -126,29 +128,6 @@ def WriteGerrisFile(file, stg):
         fh.write('\n1 2 right')
 
 
-# test function
-def TestRun():
-    # setting up the process settings
-    stg = {}
-    stg['WS'] = 48
-    stg['OL'] = 16
-    stg['SA'] = 64
-    stg['SC'] = 1
-    stg['BR'] = 'on'
-    stg['BVR'] = 'on'
-    stg['DT'] = 0.001094
-    stg['DP'] = os.path.join('E:\\repos\\FlowVisLab\\Images', 'Orifice_flat')
-    stg['UV'] = 2000
-    stg['VV'] = 2000
-
-    bg = ProcessHandler(stg)
-
-    # plot results
-    files = os.path.join(stg['DP'], f'Analysis/frame0000.dat')
-    fig, q, label = DrawPIVPlot(files, stg['SC'], bg)
-    return fig
-
-
 def update_quiver(num, q, x, y):
     x, y, u, v, _ = tools.read_data(files[num])
     q.set_UVC(u,v)
@@ -172,7 +151,7 @@ def GeneratePIVanim(files, scale, bg):
 def SavePIVanim(address, scale, bg):
     files = sorted(glob.glob(os.path.join(address, 'Analysis/frame*.dat')))
     x, y, u, v, _ = tools.read_data(files[0])
-    fig = Figure(figsize=(5, 4), dpi=100)
+    fig = Figure(figsize=(6, 4.5), dpi=120)
     canvas = FigureCanvasAgg(fig)
     ax = fig.add_subplot(111)
     ax.imshow(bg, cmap='gray', extent=[0., 780/scale, 0., 580/scale])
@@ -185,7 +164,7 @@ def SavePIVanim(address, scale, bg):
     imglist = []
     img = Image.frombytes('RGB', fig.canvas.get_width_height(),fig.canvas.tostring_rgb())
     imglist.append(img)
-    for i in range(len(files)):
+    for i in range(30):
         x, y, u, v, _ = tools.read_data(files[i])
         q.set_UVC(u,v)
         canvas.draw()
@@ -195,8 +174,69 @@ def SavePIVanim(address, scale, bg):
     imglist[0].save(os.path.join(os.path.dirname(files[0]), '1result.gif'),
                save_all=True, append_images=imglist[1:], optimize=False, duration=200, loop=0)
 
+
+def SaveCFDanim(address, p, vmin, vmax):
+    files = sorted(glob.glob(os.path.join(address, 'output_*.txt')))
+    a = np.loadtxt(files[0], skiprows=1)
+    x, y, u, v, pressure = a[:,0], a[:,1], a[:,3], a[:,4], a[:,5]
+    fig = Figure(figsize=(5, 7), dpi=120)
+    canvas = FigureCanvasAgg(fig)
+    ax = fig.subplots()
+    # x and y axes are messed up bc we are plotting and rotating the results CCW at the same time
+    cntr = ax.tricontourf(-y, x, pressure, levels=20, cmap='hot', vmin=vmin, vmax=vmax)
+    fig.colorbar(cntr, ax=ax, aspect=30, shrink=0.5)
+    q = ax.quiver(-y, x, -v, -u, units='xy', color='k', minlength=0.1, minshaft=1.2)
+    ax.add_collection(p)
+    ax.axis([-40, 40, -40, 120])
+    ax.set_title('Velocity Field + pressure contour', size=16, pad=25)
+    ax.set_xlabel('x (mm)', size=14, labelpad=10)
+    ax.set_ylabel('y (mm)', size=14, labelpad=-2)
+    canvas.draw()
+    imglist = []
+    img = Image.frombytes('RGB', fig.canvas.get_width_height(),fig.canvas.tostring_rgb())
+    imglist.append(img)
+    for i in range(len(files)):
+        a = np.loadtxt(files[i], skiprows=1)
+        u, v, pressure = a[:,3], a[:,4], a[:,5]
+        #ax.cla()
+        cntr = ax.tricontourf(-y, x, pressure, levels=20, cmap='hot', vmin=vmin, vmax=vmax)
+        q = ax.quiver(-y, x, -v, -u, color='k', units='xy', minlength=0.1, minshaft=1.2)
+        ax.add_collection(p)
+        canvas.draw()
+        img = Image.frombytes('RGB', fig.canvas.get_width_height(),fig.canvas.tostring_rgb())
+        imglist.append(img)
+
+    imglist[0].save(os.path.join(os.path.dirname(files[0]), 'CFD.gif'),
+               save_all=True, append_images=imglist[1:], optimize=False, duration=200, loop=0)
+
+
+# test function
+def TestRun():
+    # setting up the process settings
+    stg = {}
+    stg['WS'] = 48
+    stg['OL'] = 16
+    stg['SA'] = 64
+    stg['SC'] = 1
+    stg['BR'] = 'on'
+    stg['BVR'] = 'on'
+    stg['DT'] = 0.001094
+    stg['DP'] = os.path.join('E:\\repos\\FlowVisLab\\Images', 'Orifice_flat')
+    stg['UV'] = 2000
+    stg['VV'] = 2000
+
+    bg = ProcessHandler(stg)
+
+    # plot results
+    files = os.path.join(stg['DP'], f'Analysis/frame0000.dat')
+    fig, q, label = DrawPIVPlot(files, stg['SC'], bg)
+    return fig
+
 if __name__ == '__main__':
 
-    bg = tools.imread('E:\\repos\\FlowVisLab\\Images\\Orifice_flat\\avg.jpg')
+    #bg = tools.imread('E:\\repos\\FlowVisLab\\Images\\Orifice_flat\\avg.jpg')
     #files = sorted(glob.glob('E:\\repos\\FlowVisLab\\Images\\Orifice_flat\\Analysis\\frame*.dat'))
-    SavePIVanim('E:\\repos\\FlowVisLab\\Images\\Orifice_flat', 25, bg)
+    #SavePIVanim('E:\\repos\\FlowVisLab\\Images\\Orifice_flat', 25, bg)
+    h=-27.5
+    p = PatchCollection([Wedge((-40,h+13.5), 6.625, -90, 0)], alpha=1)
+    SaveCFDanim('C:\\Users\\Asus\\Desktop\\Remote Lab\\CFD', p, vmin=-120000, vmax=24000)
