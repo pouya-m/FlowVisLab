@@ -185,7 +185,7 @@ def SaveCFDanim(address, p, vmin, vmax):
     # x and y axes are messed up bc we are plotting and rotating the results CCW at the same time
     cntr = ax.tricontourf(-y, x, pressure, levels=20, cmap='hot', vmin=vmin, vmax=vmax)
     fig.colorbar(cntr, ax=ax, aspect=30, shrink=0.5)
-    q = ax.quiver(-y, x, -v, -u, units='xy', color='k', minlength=0.1, minshaft=1.2)
+    q = ax.quiver(-y, x, -v, u, units='xy', color='k', minlength=0.1, minshaft=1.2)
     ax.add_collection(p)
     ax.axis([-40, 40, -40, 120])
     ax.set_title('Velocity Field + pressure contour', size=16, pad=25)
@@ -200,7 +200,7 @@ def SaveCFDanim(address, p, vmin, vmax):
         u, v, pressure = a[:,3], a[:,4], a[:,5]
         #ax.cla()
         cntr = ax.tricontourf(-y, x, pressure, levels=20, cmap='hot', vmin=vmin, vmax=vmax)
-        q = ax.quiver(-y, x, -v, -u, color='k', units='xy', minlength=0.1, minshaft=1.2)
+        q = ax.quiver(-y, x, -v, u, color='k', units='xy', minlength=0.1, minshaft=1.2)
         ax.add_collection(p)
         canvas.draw()
         img = Image.frombytes('RGB', fig.canvas.get_width_height(),fig.canvas.tostring_rgb())
@@ -237,6 +237,9 @@ if __name__ == '__main__':
     #bg = tools.imread('E:\\repos\\FlowVisLab\\Images\\Orifice_flat\\avg.jpg')
     #files = sorted(glob.glob('E:\\repos\\FlowVisLab\\Images\\Orifice_flat\\Analysis\\frame*.dat'))
     #SavePIVanim('E:\\repos\\FlowVisLab\\Images\\Orifice_flat', 25, bg)
-    h=-27.5
-    p = PatchCollection([Wedge((-40,h+13.5), 6.625, -90, 0)], alpha=1)
-    SaveCFDanim('C:\\Users\\Asus\\Desktop\\Remote Lab\\CFD', p, vmin=-120000, vmax=24000)
+    #h=-27.5
+    #p = PatchCollection([Wedge((-40,h+13.5), 6.625, -90, 0)], alpha=1)
+    #SaveCFDanim('C:\\Users\\Asus\\Desktop\\Remote Lab\\CFD', p, vmin=-120000, vmax=24000)
+    print('t')
+    print('test',flush=True)
+    print('k')
