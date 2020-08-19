@@ -57,7 +57,7 @@ def DrawPIVPlot(files, scale, bg):
     # plotting the results
     fig, ax = plt.subplots()
     ax.imshow(bg, cmap='gray', extent=[0., 780/scale, 0., 580/scale])
-    q = ax.quiver(x, y, u, -v, color='b', units='xy', minlength=0.1, minshaft=1.2)
+    q = ax.quiver(x, y, u, v, color='b', units='xy', minlength=0.1, minshaft=1.2)
     ax.set_title('Velocity Field', size=16)
     ax.set_xlabel('x (mm)', size=14, labelpad=2)
     ax.set_ylabel('y (mm)', size=14, labelpad=-10)
@@ -86,8 +86,8 @@ def ProcessHandler(stg):
     print('- done processing')
     '''
     fig, ax = plt.subplots(2,2)
-    img = tools.imread(task.files_b[0])
-    bg = bg_b
+    img = tools.imread(task.files_a[0])
+    bg = bg_a
     ax[0,0].imshow(img, cmap='gray')
     ax[0,1].imshow(bg, cmap='gray')
     ax[1,0].imshow(reflection, cmap='gray')
@@ -164,7 +164,7 @@ def SavePIVanim(address, scale, bg):
     imglist = []
     img = Image.frombytes('RGB', fig.canvas.get_width_height(),fig.canvas.tostring_rgb())
     imglist.append(img)
-    for i in range(30):
+    for i in range(len(files)):
         x, y, u, v, _ = tools.read_data(files[i])
         q.set_UVC(u,v)
         canvas.draw()
@@ -214,21 +214,22 @@ def SaveCFDanim(address, p, vmin, vmax):
 def TestRun():
     # setting up the process settings
     stg = {}
-    stg['WS'] = 48
-    stg['OL'] = 16
-    stg['SA'] = 64
+    stg['WS'] = 64
+    stg['OL'] = 32
+    stg['SA'] = 80
     stg['SC'] = 1
     stg['BR'] = 'on'
-    stg['BVR'] = 'on'
+    stg['BVR'] = 'off'
     stg['DT'] = 0.001094
-    stg['DP'] = os.path.join('E:\\repos\\FlowVisLab\\Images', 'Orifice_flat')
-    stg['UV'] = 2000
-    stg['VV'] = 2000
+    stg['DP'] = os.path.join('E:\\repos\\FlowVisLab\\Images', 'raw_001094_25')
+    stg['MF'] = [8000,15000]
+    stg['GF'] = [(-10000,10000),(-1000,20000)]
 
-    bg = ProcessHandler(stg)
+    #bg = ProcessHandler(stg)
+    bg = tools.imread(os.path.join(stg['DP'], 'avg.jpg'))
 
     # plot results
-    files = os.path.join(stg['DP'], f'Analysis/frame0000.dat')
+    files = os.path.join(stg['DP'], f'Analysis/frame0008.dat')
     fig, q, label = DrawPIVPlot(files, stg['SC'], bg)
     return fig
 
@@ -240,6 +241,5 @@ if __name__ == '__main__':
     #h=-27.5
     #p = PatchCollection([Wedge((-40,h+13.5), 6.625, -90, 0)], alpha=1)
     #SaveCFDanim('C:\\Users\\Asus\\Desktop\\Remote Lab\\CFD', p, vmin=-120000, vmax=24000)
-    print('t')
-    print('test',flush=True)
-    print('k')
+    fig = TestRun()
+    plt.show()
