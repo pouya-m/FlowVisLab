@@ -30,8 +30,8 @@ def ProcessPIV (args, bga, bgb, reflection, stg):
     #plt.show()
     
     # main piv processing
-    u, v = pyprocess.extended_search_area_piv( frame_a, frame_b, \
-        window_size=stg['WS'], overlap=stg['OL'], dt=stg['DT'], search_area_size=stg['SA'], sig2noise_method=None)
+    u, v, s2n = pyprocess.extended_search_area_piv( frame_a, frame_b, \
+        window_size=stg['WS'], overlap=stg['OL'], dt=stg['DT'], search_area_size=stg['SA'], sig2noise_method='peak2peak')
     x, y = pyprocess.get_coordinates( image_size=frame_a.shape, window_size=stg['WS'], overlap=stg['OL'] )
     
     if stg['BVR'] == 'on':
@@ -43,7 +43,7 @@ def ProcessPIV (args, bga, bgb, reflection, stg):
     x, y, u, v = scaling.uniform(x, y, u, v, stg['SC'])
     # saving the results
     save_file = tools.create_path(file_a, 'Analysis')
-    tools.save(x, y, u, v, x, save_file+'.dat')
+    tools.save(x, y, u, v, s2n, save_file+'.dat')
     
 
 # this function draws the vector field
@@ -179,7 +179,7 @@ def SaveCFDanim(address, p, vmin, vmax):
     files = sorted(glob.glob(os.path.join(address, 'output_*.txt')))
     a = np.loadtxt(files[0], skiprows=1)
     x, y, u, v, pressure = a[:,0], a[:,1], a[:,3], a[:,4], a[:,5]
-    fig = Figure(figsize=(5, 7), dpi=120)
+    fig = Figure(figsize=(5, 4.7), dpi=120)
     canvas = FigureCanvasAgg(fig)
     ax = fig.subplots()
     # x and y axes are messed up bc we are plotting and rotating the results CCW at the same time
@@ -187,7 +187,7 @@ def SaveCFDanim(address, p, vmin, vmax):
     fig.colorbar(cntr, ax=ax, aspect=30, shrink=0.5)
     q = ax.quiver(-y, x, -v, u, units='xy', color='k', minlength=0.1, minshaft=1.2)
     ax.add_collection(p)
-    ax.axis([-40, 40, -40, 120])
+    ax.axis([-40, 40, -40, 80])
     ax.set_title('Velocity Field + pressure contour', size=16, pad=25)
     ax.set_xlabel('x (mm)', size=14, labelpad=10)
     ax.set_ylabel('y (mm)', size=14, labelpad=-2)
