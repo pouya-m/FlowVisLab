@@ -60,7 +60,9 @@ def global_val( u, v, u_thresholds, v_thresholds ):
         
     """
 
-    np.warnings.filterwarnings('ignore')
+    # np.warnings.filterwarnings('ignore')
+    import warnings
+    warnings.filterwarnings("ignore")
     
     ind = np.logical_or(\
           np.logical_or(u < u_thresholds[0], u > u_thresholds[1]), \
