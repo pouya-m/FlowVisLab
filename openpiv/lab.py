@@ -162,13 +162,13 @@ def SavePIVanim(address, scale, bg):
     #plt.tight_layout(pad=10)
     canvas.draw()
     imglist = []
-    img = Image.frombytes('RGB', fig.canvas.get_width_height(),fig.canvas.renderer.buffer_rgba())
+    img = Image.frombytes('RGBA', fig.canvas.get_width_height(),fig.canvas.renderer.buffer_rgba())
     imglist.append(img)
     for i in range(len(files)):
         x, y, u, v, _ = tools.read_data(files[i])
         q.set_UVC(u,v)
         canvas.draw()
-        img = Image.frombytes('RGB', fig.canvas.get_width_height(),fig.canvas.renderer.buffer_rgba())
+        img = Image.frombytes('RGBA', fig.canvas.get_width_height(),fig.canvas.renderer.buffer_rgba())
         imglist.append(img)
 
     imglist[0].save(os.path.join(os.path.dirname(files[0]), '1result.gif'),
@@ -193,7 +193,7 @@ def SaveCFDanim(address, p, vmin, vmax):
     ax.set_ylabel('y (mm)', size=14, labelpad=-2)
     canvas.draw()
     imglist = []
-    img = Image.frombytes('RGB', fig.canvas.get_width_height(),fig.canvas.renderer.buffer_rgba())
+    img = Image.frombytes('RGBA', fig.canvas.get_width_height(),fig.canvas.renderer.buffer_rgba())
     imglist.append(img)
     for i in range(len(files)):
         a = np.loadtxt(files[i], skiprows=1)
@@ -203,7 +203,7 @@ def SaveCFDanim(address, p, vmin, vmax):
         q = ax.quiver(-y, x, -v, u, color='k', units='xy', minlength=0.1, minshaft=1.2)
         ax.add_collection(p)
         canvas.draw()
-        img = Image.frombytes('RGB', fig.canvas.get_width_height(),fig.canvas.renderer.buffer_rgba())
+        img = Image.frombytes('RGBA', fig.canvas.get_width_height(),fig.canvas.renderer.buffer_rgba())
         imglist.append(img)
 
     imglist[0].save(os.path.join(os.path.dirname(files[0]), 'CFD.gif'),
